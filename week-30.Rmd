@@ -1,0 +1,143 @@
+---
+title: "Australian Pets"
+date: 2020-07-21
+output: html_output
+---
+
+# TidyTuesday
+
+Join the R4DS Online Learning Community in the weekly #TidyTuesday event!
+Every week we post a raw dataset, a chart or article related to that dataset, and ask you to explore the data.
+While the dataset will be “tamed”, it will not always be tidy! As such you might need to apply various R for Data Science techniques to wrangle the data into a true tidy format.
+The goal of TidyTuesday is to apply your R skills, get feedback, explore other’s work, and connect with the greater #RStats community!
+As such we encourage everyone of all skills to participate!
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(tidytuesdayR)
+library(ggplot2)
+library(ggforce)
+
+theme_set(theme_bw(16))
+```
+
+# Load the weekly Data
+
+Dowload the weekly data and make available in the `tt` object.
+
+```{r Load}
+
+tt <- tt_load("2020-07-21")
+
+```
+
+
+# Readme
+
+Take a look at the readme for the weekly data to get insight on the dataset.
+This includes a data dictionary, source, and a link to an article on the data.
+
+```{r Readme, eval = interactive()}
+
+tt
+
+```
+
+
+# Glimpse Data
+
+Take an initial look at the format of the data available.
+
+```{r Glimpse}
+
+tt %>% 
+  map(glimpse)
+
+```
+
+# Wrangle
+
+Explore the data and process it into a nice format for plotting! Access each dataset by name by using a dollarsign after the `tt` object and then the name of the data set.
+
+```{r Wrangle}
+
+tt$animal_outcomes %>%
+  pivot_longer(cols = ACT:WA,
+               names_to = "territory",
+               values_to = "count") ->
+  df1
+
+```
+
+
+# Visualize
+
+Using your processed dataset, create your unique visualization.
+
+```{r Visualize}
+df1 %>%
+  ggplot(aes(x=year, y = count, color=animal_type)) +
+  geom_point(alpha = 2/10)  +
+  scale_y_log10() +
+  facet_zoom(xlim = c(2010,2014)) +
+  ggtitle("A cool title")
+```
+
+```{r fig.height=12, fig.width=8}
+df1 %>%
+  ggplot(aes(x=year, y = count, color=animal_type)) +
+  geom_point(alpha = 7/10)  +
+  geom_line(alpha = 7/10)  +
+  scale_y_log10() +
+  facet_wrap(territory ~ outcome) +
+  # facet_col(~outcome) +
+  # facet_zoom(ylim = c(2000,3000)) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  # theme(legend.position="top", legend.box = "horizontal") +
+  labs(color = "Animal Type") -> p2
+  # ggtitle("Animal Outcomes") -> p2
+
+
+# Inspired by https://github.com/Khanzi/tidy-tuesdays/blob/master/2020-07-21/initial_exploration.r
+library(patchwork)
+patch <- (p2) + # Defining pathwork layout
+  
+  plot_layout(guides = 'collect') + # Collecting guides on the right side
+  
+  # Annotations
+  plot_annotation(
+    title = "Animal Outcomes in Australia",
+    caption = "@andrewcstewart on #TidyTuesday. Data from RSPCA Australia") &
+  
+  # Small theme tweaks
+  theme(plot.title = element_text(size = 30, hjust=0.5), # Centering title and changing size
+        legend.position="top", legend.box = "horizontal",
+
+        panel.grid = element_line(color = 'white'), # Hiding gridlines
+        text = element_text(family = 'Avenir Book')) # Changing font  
+  
+patch  
+```
+
+# Save Image
+
+Save your image for sharing. Be sure to use the `#TidyTuesday` hashtag in your post on twitter! 
+
+```{r eval=FALSE, include=FALSE}
+
+# This will save your most recent plot
+ggsave(
+  filename = "My TidyTuesday Plot.png",
+  device = "png")
+
+```
+
+
+# References
+
+- https://datavizpyr.com/how-to-zoom-in-on-a-plot-in-r/
+- https://github.com/thomasp85/patchwork
+
