@@ -1,0 +1,55 @@
+---
+title: "TidyTuesday - Week 29"
+author: "Andrew Stewart"
+date: "7/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidytuesdayR)
+library(tidyverse)
+library(ggplot2)
+
+# Get the Data
+
+# Read in with tidytuesdayR package 
+# Install from CRAN via: install.packages("tidytuesdayR")
+# This loads the readme and all the datasets for the week of interest
+
+# Either ISO-8601 date or year/week works!
+
+#tuesdata <- tidytuesdayR::tt_load('2020-07-14')
+tuesdata <- tidytuesdayR::tt_load(2020, week = 29)
+
+astronauts <- tuesdata$astronauts
+
+# Or read in the data manually
+
+# astronauts <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-14/astronauts.csv')
+astronauts
+```
+
+## Cleaning
+
+```{r skimr}
+skimr::skim(astronauts)
+```
+
+## Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+astronauts %>%
+  ggplot(aes(y=nationality, x=year_of_selection)) +
+  geom_boxplot()
+```
+
+
+
+```{r}
+sessioninfo::session_info()
+```
+
+

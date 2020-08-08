@@ -1,0 +1,333 @@
+---
+title: "TidyTemplate"
+date: 2020-08-04
+output:
+  html_document:
+    theme: paper
+    highlight: kate
+editor_options:
+  chunk_output_type: console
+params:
+  week: !r tidytuesdayR::last_tuesday()
+  foo: !r rmarkdown::metadata$title
+---
+
+```{r}
+rmarkdown::metadata$title
+```
+
+
+# TidyTuesday
+
+Join the R4DS Online Learning Community in the weekly #TidyTuesday event!
+Every week we post a raw dataset, a chart or article related to that dataset, and ask you to explore the data.
+While the dataset will be “tamed”, it will not always be tidy! As such you might need to apply various R for Data Science techniques to wrangle the data into a true tidy format.
+The goal of TidyTuesday is to apply your R skills, get feedback, explore other’s work, and connect with the greater #RStats community!
+As such we encourage everyone of all skills to participate!
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.showtext = T, fig.retina = 1)
+library(janitor)
+library(tidyverse)
+library(tidytuesdayR)
+library(ggplot2)
+library(cowplot)
+require(maps)
+require(viridis)
+library(pdftools)
+
+# theme_set(theme_minimal())
+
+theme_set(
+  theme_void()
+  )
+```
+
+# Load the weekly Data
+
+Dowload the weekly data and make available in the `tt` object.
+
+```{r Load}
+
+tt <- tt_load("2020-08-04")
+
+```
+
+
+# Readme
+
+Take a look at the readme for the weekly data to get insight on the dataset.
+This includes a data dictionary, source, and a link to an article on the data.
+
+```{r Readme, eval = interactive()}
+
+tt
+
+```
+
+# Glimpse Data
+
+Take an initial look at the format of the data available.
+
+```{r Glimpse, eval=FALSE, include=FALSE}
+
+tt %>% 
+  map(glimpse)
+
+```
+
+```{r eval=FALSE, include=FALSE}
+for(i in names(tt))
+  DataExplorer::create_report(tt[[i]],
+                output_file = glue::glue("{i}.html"),
+                output_dir = here::here(params$week))
+
+DataExplorer::create_report(tt$energy_types,
+                output_file = glue::glue("energy_types.html"),
+                output_dir = here::here(params$week))
+
+```
+
+
+
+# Wrangle
+
+Explore the data and process it into a nice format for plotting! Access each dataset by name by using a dollarsign after the `tt` object and then the name of the data set.
+
+```{r Wrangle}
+
+df <- tt$energy_types %>%
+  pivot_longer(
+    cols = c('2016','2017','2018'),
+    names_to = 'year',
+    values_to = 'energy'
+  )
+df %>%
+  group_by(country, country_name, type, year) %>%
+  summarize(energy = sum(energy)) %>%
+  arrange(country)
+```
+
+```{r}
+tt$country_totals %>%
+  pivot_longer(
+    cols = c('2016','2017','2018'),
+    names_to = 'year',
+    values_to = 'energy'
+  ) %>%
+arrange(country)
+```
+
+
+
+# Visualize
+
+Using your processed dataset, create your unique visualization.
+
+```{r}
+# Some EU Contries
+some.eu.countries <- c(
+  "Portugal", "Spain", "France", "Switzerland", "Germany",
+  "Austria", "Belgium", "UK", "Netherlands",
+  "Denmark", "Poland", "Italy", 
+  "Croatia", "Slovenia", "Hungary", "Slovakia",
+  "Czech republic", "Finland","Sweden"
+)
+# Retrievethe map data
+some.eu.maps <- map_data("world", region = some.eu.countries)
+
+# Compute the centroid as the mean longitude and lattitude
+# Used as label coordinate for country's names
+region.lab.data <- some.eu.maps %>%
+  group_by(region) %>%
+  summarise(long = mean(long), lat = mean(lat))
+
+ggplot(some.eu.maps, aes(x = long, y = lat)) +
+  geom_polygon(aes( group = group, fill = region))+
+  geom_text(aes(label = region), data = region.lab.data,  size = 3, hjust = 0.5)+
+  scale_fill_viridis_d()+
+  theme_void()+
+  theme(legend.position = "none")
+```
+
+
+```{r Visualize}
+## Following examples from https://www.datanovia.com/en/blog/how-to-create-a-map-using-ggplot2/
+
+# Some EU Contries
+some.eu.countries <- c(
+  "Portugal", "Spain", "France", "Switzerland", "Germany",
+  "Austria", "Belgium", "UK", "Netherlands",
+  "Denmark", "Poland", "Italy", 
+  "Croatia", "Slovenia", "Hungary", "Slovakia",
+  "Czech republic"
+)
+# Retrievethe map data
+regions <- df %>% drop_na(country_name) %>% pull(country_name) %>% unique()
+some.eu.maps <- map_data("world", region = regions)
+
+# Compute the centroid as the mean longitude and lattitude
+# Used as label coordinate for country's names
+region.lab.data <- some.eu.maps %>%
+  group_by(region) %>%
+  summarise(long = mean(long), lat = mean(lat))
+
+df %>%
+  filter(year == 2016) %>%
+  rename(region = country_name) %>%
+  left_join(some.eu.maps, by = "region") %>%
+  ggplot(aes(x = long, y = lat)) +
+  geom_polygon(aes( group = group, fill = energy))+
+  # geom_text(aes(label = region), data = region.lab.data,  size = 3, hjust = 0.5)+
+  scale_fill_viridis_c(option = "d")+
+  theme_void()+
+  theme(legend.position = "none")  -> p1
+
+df %>%
+  filter(year == 2017) %>%
+  rename(region = country_name) %>%
+  left_join(some.eu.maps, by = "region") %>%
+  ggplot(aes(x = long, y = lat)) +
+  geom_polygon(aes( group = group, fill = energy))+
+  # geom_text(aes(label = region), data = region.lab.data,  size = 3, hjust = 0.5)+
+  scale_fill_viridis_c(option = "d")+
+  theme_void()+
+  theme(legend.position = "none")  -> p2
+
+df %>%
+  filter(year == 2018) %>%
+  rename(region = country_name) %>%
+  left_join(some.eu.maps, by = "region") %>%
+  ggplot(aes(x = long, y = lat)) +
+  geom_polygon(aes( group = group, fill = energy))+
+  # geom_text(aes(label = region), data = region.lab.data,  size = 3, hjust = 0.5)+
+  scale_fill_viridis_c(option = "d")+
+  theme_void()+
+  theme(legend.position = "none")  -> p3
+
+df %>%
+  ggplot(aes(fill=type, x=year, y=energy)) +
+  geom_boxplot() +
+  scale_y_log10() +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) -> p4
+```
+
+```{r}
+library(patchwork)
+# p1 <- ggplot(cars, aes(x=speed)) + geom_histogram()
+# p2 <- ggplot(cars, aes(x=speed)) + geom_histogram()
+# p3 <- ggplot(cars, aes(x=speed)) + geom_histogram()
+patch <- ((p1 + p2 + p3) / p4) + # Defining pathwork layout
+  
+  plot_layout(guides = 'collect') + # Collecting guides on the right side
+  
+  # Annotations
+  plot_annotation(
+    title = "European Energy",
+    caption = "@andrewcstewart on #TidyTuesday. Data from Eurostat.") &
+  
+  # Small theme tweaks
+  theme(plot.title = element_text(size = 30, hjust=0.5), # Centering title and changing size
+        panel.grid = element_line(color = 'white'), # Hiding gridlines
+        text = element_text(family = 'Avenir Book')) # Changing font
+ 
+patch
+```
+
+
+```{r}
+# from https://cran.r-project.org/web/packages/tricolore/vignettes/choropleth_maps_with_tricolore.html
+library(tricolore)
+
+# color-code the data set and generate a color-key
+tric <- Tricolore(euro_example, p1 = 'ed_0to2', p2 = 'ed_3to4', p3 = 'ed_5to8')
+
+# add the vector of colors to the `euro_example` data
+euro_example$rgb <- tric$rgb
+
+library(ggplot2)
+
+plot_educ <-
+  # using sf dataframe `euro_example`...
+  ggplot(euro_example) +
+  # ...draw a polygon for each region...
+  geom_sf(aes(fill = rgb, geometry = geometry), size = 0.1) +
+  # ...and color each region according to the color code in the variable `rgb`
+  scale_fill_identity()
+
+plot_educ 
+```
+
+```{r}
+euro_example %>%
+  mutate(country = str_sub(id, 1, 2)) %>%
+  left_join(df, by = "country") %>%
+  drop_na(type, year) %>%
+  ggplot() +
+  geom_sf(aes(fill = energy, geometry = geometry), size = 0.1) +
+  scale_fill_viridis_c(option = "C", 
+                       # guide = guide_legend(legend.key.size = unit(1.5, "cm"))
+                      ) +
+  theme(legend.position='bottom') +
+  facet_grid(year ~ type, switch = "y") -> p1
+
+  # ...and color each region according to the color code in the variable `rgb`
+  # scale_fill_identity()
+```
+
+```{r}
+
+patch <- ((p1)) + # Defining pathwork layout
+  
+  plot_layout(guides = 'collect') + # Collecting guides on the right side
+  
+  # Annotations
+  plot_annotation(
+    title = "European energy generation",
+    caption = "@andrewcstewart on #TidyTuesday. Data from Eurostat.") &
+  
+  # Small theme tweaks
+  theme(plot.title = element_text(size = 30, hjust=0.5), # Centering title and changing size
+        panel.grid = element_line(color = 'white'), # Hiding gridlines
+        legend.position='bottom',
+        text = element_text(family = 'Avenir Book')) # Changing font
+ 
+patch
+```
+
+
+# Save Image
+
+Save your image for sharing. Be sure to use the `#TidyTuesday` hashtag in your post on twitter! 
+
+```{r}
+
+# This will save your most recent plot
+# ggsave(
+#   path = here::here(params$week),
+#   filename = "final.png",
+#   device = "png")
+
+ggsave(
+  path = here::here(params$week),
+  filename = "final.png",
+  width = 16, 
+  height = 7, 
+  device = "png")
+```
+
+```{r}
+# pdf_convert(pdf = here::here(params$week, "final.pdf"),
+            # format = "png", dpi = 500)
+
+```
+
+# Session info
+
+```{r session}
+Sys.time()
+git2r::repository()
+sessionInfo()
+```
