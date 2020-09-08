@@ -1,0 +1,26 @@
+name: Weekly Schedule
+on:
+  schedule:
+  - cron: 0 6 * * 2  # Every Tuesday – https://crontab.guru
+
+jobs:
+  weekly_schedule:
+    name: Weekly Schedule
+    runs-on: ubuntu-latest
+    steps:
+
+    # Repo code checkout required if `template` is used
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: issue-bot
+      uses: imjohnbo/issue-bot@v2
+      with:
+        assignees: "andrewcstewart" # GitHub handles without the @
+        labels: "dataset"
+        pinned: true
+        close-previous: true
+        linked-comments: true
+        template: ".github/ISSUE_TEMPLATE/tt.md" # assignees, labels will be overridden if present in YAML header
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
