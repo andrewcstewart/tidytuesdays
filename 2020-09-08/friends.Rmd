@@ -1,0 +1,158 @@
+---
+title: "Tidy Tuesday: "
+author: "Andrew Stewart"
+date: !r Sys.Date()
+output:
+  html_document:
+    theme: paper
+    highlight: kate
+editor_options:
+  chunk_output_type: console
+params:
+  week: '2020-09-08'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, fig.showtext = T, fig.retina = 1)
+
+# Packages
+library(tidytuesdayR)
+library(tidyverse)
+library(janitor)
+library(here)
+library(ggplot2)
+library(patchwork)
+library(waffle)
+
+theme_set(theme_minimal())
+
+# First update the tidyduesdayR master file
+tidytuesdayR:::tt_update_master_file(force=TRUE)
+```
+
+# Create workspace
+
+```{r}
+fs::dir_create(here(params$week))
+```
+
+# Load the weekly Data
+
+Dowload the weekly data and make available in the `tt` object.
+
+```{r Load}
+
+tt <- tt_load(params$week)
+
+```
+
+# Readme
+
+Take a look at the readme for the weekly data to get insight on the dataset.
+This includes a data dictionary, source, and a link to an article on the data.
+
+```{r Readme, eval = interactive()}
+
+tt
+
+```
+
+
+# Glimpse Data
+
+Take an initial look at the format of the data available.
+
+```{r Glimpse}
+
+tt %>% 
+  map(glimpse)
+
+```
+
+```{r Skim}
+
+tt %>% 
+  map(skimr::skim)
+
+```
+
+
+# Explore
+
+Generate exploratory data report using DataExplorer
+
+```{r Explore}
+
+create_report(data, 
+              output_file = "report.html", 
+              output_dir = here::here(params$week))
+
+```
+
+# Wrangle
+
+Explore the data and process it into a nice format for plotting! Access each dataset by name by using a dollarsign after the `tt` object and then the name of the data set.
+
+```{r Wrangle}
+main_friends <- tt$friends %>% 
+  tabyl(speaker) %>% 
+  arrange(desc(n)) %>% 
+  head(6) %>% 
+  pull(speaker)
+
+# df <- tt
+df <- tt$friends %>%
+  count(season, speaker) %>%
+  filter(speaker %in% main_friends)
+```
+
+
+
+# Visualize
+
+Using your processed dataset, create your unique visualization.
+
+```{r}
+
+ggplot(df, aes(fill = speaker, values = n)) +
+  geom_waffle(color = "white", size = .25, n_rows = 10, flip = TRUE) +
+  facet_wrap(~season, nrow = 1, strip.position = "bottom") +
+  scale_x_discrete() + 
+  scale_y_continuous(labels = function(x) x * 10, # make this multiplyer the same as n_rows
+                     expand = c(0,0)) +
+  ggthemes::scale_fill_tableau(name=NULL) +
+  coord_equal() +
+  labs(
+    title = "Faceted Waffle Bar Chart",
+    subtitle = "{dplyr} storms data",
+    x = "Year",
+    y = "Count"
+  ) +
+  theme_minimal(base_family = "Roboto Condensed") +
+  theme(panel.grid = element_blank(), axis.ticks.y = element_line()) +
+  guides(fill = guide_legend(reverse = TRUE))
+
+```
+
+
+# Save Image
+
+Save your image for sharing. Be sure to use the `#TidyTuesday` hashtag in your post on twitter! 
+
+```{r}
+
+# This will save your most recent plot
+ggsave(
+  path = here::here(params$week),
+  filename = "tt.png",
+  device = "png")
+
+```
+
+# Session info
+
+```{r session}
+Sys.time()
+git2r::repository()
+sessionInfo()
+```

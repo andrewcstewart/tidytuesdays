@@ -1,5 +1,15 @@
 
+<!-- badges: start -->
+
+[![R build
+status](https://github.com/andrewcstewart/tidytuesdays/workflows/R-CMD-check/badge.svg)](https://github.com/andrewcstewart/tidytuesdays/actions)
+<!-- badges: end -->
+
 # TidyTuesdays
+
+## 2020-09-08
+
+![](2020-09-08/friends.png)
 
 ## 2020-08-25 Chopped
 
@@ -33,6 +43,7 @@
 
 # Fellow TidyTuesday folks I follow
 
+  - <https://github.com/Z3tt/TidyTuesday>
   - <https://github.com/jack-davison/TidyTuesday>
   - <https://github.com/kellycotton/TidyTuesdays>
   - <https://github.com/iandouglasbell/Tidy-Tuesdays>
