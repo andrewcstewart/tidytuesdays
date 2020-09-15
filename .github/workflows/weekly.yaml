@@ -14,10 +14,13 @@ jobs:
     # Repo code checkout required if `template` is used
     - name: Checkout
       uses: actions/checkout@v2
-      
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"      
     - name: issue-bot
       uses: imjohnbo/issue-bot@v2
       with:
+        title: "TidyTuesday ${{ steps.date.outputs.date }}"
         assignees: "andrewcstewart" # GitHub handles without the @
         labels: "dataset"
         pinned: true
