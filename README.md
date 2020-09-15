@@ -7,6 +7,10 @@ status](https://github.com/andrewcstewart/tidytuesdays/workflows/R-CMD-check/bad
 
 # TidyTuesdays
 
+## 2020-09-15
+
+![](2020-09-15/kids.png)
+
 ## 2020-09-08
 
 ![](2020-09-08/friends.png)
@@ -47,3 +51,4 @@ status](https://github.com/andrewcstewart/tidytuesdays/workflows/R-CMD-check/bad
   - <https://github.com/jack-davison/TidyTuesday>
   - <https://github.com/kellycotton/TidyTuesdays>
   - <https://github.com/iandouglasbell/Tidy-Tuesdays>
+  - <https://github.com/beeb22/tidytuesday>

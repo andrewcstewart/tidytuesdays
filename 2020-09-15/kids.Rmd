@@ -1,5 +1,5 @@
 ---
-title: "Tidy Tuesday: Friends"
+title: "Tidy Tuesday: Kids"
 author: "Andrew Stewart"
 date: !r Sys.Date()
 output:
@@ -9,7 +9,7 @@ output:
 editor_options:
   chunk_output_type: console
 params:
-  week: '2020-09-08'
+  week: "2020-09-15"
 ---
 
 ```{r setup, include=FALSE}
@@ -22,13 +22,13 @@ library(janitor)
 library(here)
 library(ggplot2)
 library(patchwork)
-library(waffle)
 
 theme_set(theme_minimal())
 
 # First update the tidyduesdayR master file
 tidytuesdayR:::tt_update_master_file(force=TRUE)
 ```
+
 
 # Create workspace
 
@@ -83,55 +83,37 @@ Generate exploratory data report using DataExplorer
 
 ```{r Explore}
 
-create_report(data, 
+DataExplorer::create_report(tt$kids, 
               output_file = "report.html", 
               output_dir = here::here(params$week))
 
 ```
+
 
 # Wrangle
 
 Explore the data and process it into a nice format for plotting! Access each dataset by name by using a dollarsign after the `tt` object and then the name of the data set.
 
 ```{r Wrangle}
-main_friends <- tt$friends %>% 
-  tabyl(speaker) %>% 
-  arrange(desc(n)) %>% 
-  head(6) %>% 
-  pull(speaker)
 
-# df <- tt
-df <- tt$friends %>%
-  count(season, speaker) %>%
-  filter(speaker %in% main_friends)
+df <- tt$kids
+
 ```
-
-
 
 # Visualize
 
 Using your processed dataset, create your unique visualization.
 
+
 ```{r}
-
-ggplot(df, aes(fill = speaker, values = n)) +
-  geom_waffle(color = "white", size = .25, n_rows = 10, flip = TRUE) +
-  facet_wrap(~season, nrow = 1, strip.position = "bottom") +
-  scale_x_discrete() + 
-  scale_y_continuous(labels = function(x) x * 10, # make this multiplyer the same as n_rows
-                     expand = c(0,0)) +
-  ggthemes::scale_fill_tableau(name=NULL) +
-  coord_equal() +
-  labs(
-    title = "Faceted Waffle Bar Chart",
-    subtitle = "{dplyr} storms data",
-    x = "Year",
-    y = "Count"
-  ) +
-  theme_minimal(base_family = "Roboto Condensed") +
-  theme(panel.grid = element_blank(), axis.ticks.y = element_line()) +
-  guides(fill = guide_legend(reverse = TRUE))
-
+ggplot(df) +
+ aes(x = state, fill = variable, weight = inf_adj_perchild) +
+ geom_bar(position = "fill") +
+ scale_fill_hue() +
+ labs(x = "State", y = "Proportion", title = "Composition of state spending on children", subtitle = "Proportion of amount spent per child, adjusted for inflation", caption = "Created by @andrewcstewart, data from Urban Institute, #TidyTuesday", fill = "Program") +
+ coord_flip() +
+ ggthemes::theme_fivethirtyeight() +
+ theme(legend.position = "bottom")
 ```
 
 
@@ -144,7 +126,7 @@ Save your image for sharing. Be sure to use the `#TidyTuesday` hashtag in your p
 # This will save your most recent plot
 ggsave(
   path = here::here(params$week),
-  filename = "tt.png",
+  filename = "kids.png",
   device = "png")
 
 ```

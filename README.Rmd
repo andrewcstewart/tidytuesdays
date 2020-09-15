@@ -15,6 +15,11 @@ library(pander)
 
 # TidyTuesdays
 
+
+## 2020-09-15
+
+![](2020-09-15/kids.png)
+
 ## 2020-09-08
 
 ![](2020-09-08/friends.png)
@@ -71,7 +76,8 @@ print("foo")
 - [`artyfarty`](https://datarootsio.github.io/artyfarty//index.html)
 - [`ggpomological`](https://www.garrickadenbuie.com/project/ggpomological/)
 - [`tvthemes`](https://ryo-n7.github.io/2019-05-16-introducing-tvthemes-package/)
-
+- [`ggsci`](https://cran.r-project.org/web/packages/ggsci/vignettes/ggsci.html)
+- [`sf`](https://r-spatial.github.io/sf/index.html)
 
 # Fellow TidyTuesday folks I follow
 
@@ -79,3 +85,4 @@ print("foo")
 - https://github.com/jack-davison/TidyTuesday
 - https://github.com/kellycotton/TidyTuesdays
 - https://github.com/iandouglasbell/Tidy-Tuesdays
+- https://github.com/beeb22/tidytuesday
